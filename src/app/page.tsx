@@ -1,66 +1,148 @@
-import Image from "next/image";
-import styles from "./page.module.css";
+'use client';
 
-export default function Home() {
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import Navbar from '@/components/Navbar';
+import { User } from '@/lib/types';
+
+const SUGGESTIONS = [
+  'Become a Web Developer',
+  'Learn Machine Learning',
+  'Master Guitar',
+  'Learn Japanese',
+  'Become a Data Scientist',
+  'Learn UI/UX Design',
+  'Master Chess',
+  'Learn Digital Marketing',
+];
+
+export default function LandingPage() {
+  const router = useRouter();
+  const [user, setUser] = useState<User | null>(null);
+  const [goal, setGoal] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    fetch('/api/auth', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'me' }),
+    })
+      .then((r) => r.json())
+      .then((d) => setUser(d.user))
+      .catch(() => { });
+  }, []);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!goal.trim()) return;
+
+    if (!user) {
+      router.push('/auth');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const res = await fetch('/api/generate-tree', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ goal: goal.trim() }),
+      });
+      const data = await res.json();
+
+      if (res.ok) {
+        router.push(`/tree/${data.treeId}`);
+      } else {
+        alert(data.error || 'Failed to generate tree');
+      }
+    } catch {
+      alert('Network error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleLogout = async () => {
+    await fetch('/api/auth', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'logout' }),
+    });
+    setUser(null);
+  };
+
   return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className={styles.intro}>
-          <h1>To get started, edit the page.tsx file.</h1>
-          <p>
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <>
+      <Navbar user={user} onLogout={handleLogout} />
+
+      {loading && (
+        <div className="loading-overlay">
+          <div className="spinner" />
+          <div className="loading-text">Building your skill tree...</div>
         </div>
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className={styles.secondary}
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+      )}
+
+      <main className="landing">
+        {/* Floating decoration */}
+        <div className="floating-nodes">
+          <div className="floating-node" />
+          <div className="floating-node" />
+          <div className="floating-node" />
+          <div className="floating-node" />
+          <div className="floating-node" />
+          <div className="floating-node" />
+          <div className="floating-node-line" />
+          <div className="floating-node-line" />
+        </div>
+
+        <div className="landing-hero">
+          <div className="landing-badge">
+            AI-Powered Learning Paths
+          </div>
+
+          <h1 className="landing-title">
+            Your Journey,<br />Your Skill Tree
+          </h1>
+
+          <p className="landing-subtitle">
+            Transform any learning goal into an interactive RPG-style skill tree.
+            Complete quests, unlock new branches, and level up your knowledge.
+          </p>
+
+          <form onSubmit={handleSubmit}>
+            <div className="landing-input-wrapper">
+              <input
+                className="input input-lg"
+                type="text"
+                placeholder="What do you want to master?"
+                value={goal}
+                onChange={(e) => setGoal(e.target.value)}
+                disabled={loading}
+              />
+              <button
+                className="btn btn-primary btn-lg"
+                type="submit"
+                disabled={loading || !goal.trim()}
+              >
+                {loading ? '...' : '→'} Generate
+              </button>
+            </div>
+          </form>
+
+          <div className="landing-suggestions">
+            {SUGGESTIONS.map((s) => (
+              <button
+                key={s}
+                className="suggestion-chip"
+                onClick={() => setGoal(s)}
+              >
+                {s}
+              </button>
+            ))}
+          </div>
         </div>
       </main>
-    </div>
+    </>
   );
 }
