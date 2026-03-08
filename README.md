@@ -39,26 +39,14 @@
 <table>
   <tr>
     <td width="50%" align="center">
-      <!-- <img src="./assets/screenshots/dashboard.png" alt="Dashboard" width="100%" /> -->
+      <img src="./public/scrins/1.png" alt="Dashboard" width="100%" />
       <strong>[ Dashboard ]</strong><br/>
       <sub>Manage all your skill trees in one place</sub>
     </td>
     <td width="50%" align="center">
-      <!-- <img src="./assets/screenshots/graph-view.png" alt="Graph View" width="100%" /> -->
+      <img src="./public/scrins/2.png" alt="Graph View" width="100%" />
       <strong>[ Graph View ]</strong><br/>
       <sub>Interactive node graph with RPG-inspired visual states</sub>
-    </td>
-  </tr>
-  <tr>
-    <td width="50%" align="center">
-      <!-- <img src="./assets/screenshots/theory-panel.png" alt="Theory Panel" width="100%" /> -->
-      <strong>[ Theory Panel ]</strong><br/>
-      <sub>In-depth learning content with resource links</sub>
-    </td>
-    <td width="50%" align="center">
-      <!-- <img src="./assets/screenshots/boss-node.png" alt="Boss Node" width="100%" /> -->
-      <strong>[ Boss Node ]</strong><br/>
-      <sub>Project milestones with practical briefs</sub>
     </td>
   </tr>
 </table>
